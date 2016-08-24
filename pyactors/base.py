@@ -224,13 +224,27 @@ class BaseActor(Actor):
     steps = list()
 
     def __init__(self, **kwargs):
-        self.allow_parent = kwargs.pop('allow_parent', False)
+        self.allow_parent = kwargs.pop('allow_parent', getattr(self, 'allow_parent', False))
         super(BaseActor, self).__init__(name=kwargs.get('name'), logger=kwargs.get('logger'))
 
-    @property
-    def is_waiting_message(self):
-        """ Override """
-        return True
+    def loop(self):
+        self.logger.debug("{0} --- Call loop.".format(self))
+
+        while self.processing:
+            self.logger.debug("{0} --- Execute loop. Inbox: {1}".format(self, len(self.inbox)))
+
+            try:
+                self.message = self.inbox.get()
+            except EmptyInboxException:
+                if self.is_waiting_message:
+                    self.sleep()
+                    break
+
+            self.recieve()
+
+            if self.validate():
+                self.process()
+        self.end()
 
     def send(self, **message):
         overwrite = message.pop('overwrite') if isinstance(message.get('overwrite'), bool) else False
@@ -283,10 +297,6 @@ class BaseActor(Actor):
             self.parent.send(out)
         self.stop()
 
-    def __str__(self):
-        old = super(BaseActor, self).__str__()
-        return "{0}".format(old)
-
     def sleep(self, timeout=None):
         if self._family == AF_GENERATOR:
             yield
@@ -296,25 +306,6 @@ class BaseActor(Actor):
     def _sleep(self, timeout=None):
         timeout = timeout if timeout else 0.01
         return super(BaseActor, self).sleep(timeout)
-
-    def loop(self):
-        self.logger.debug("{0} --- Call loop.".format(self))
-
-        while self.processing:
-            self.logger.debug("{0} --- Execute loop. Inbox: {1}".format(self, len(self.inbox)))
-
-            try:
-                self.message = self.inbox.get()
-            except EmptyInboxException:
-                if self.is_waiting_message:
-                    self.sleep()
-                    break
-
-            self.recieve()
-
-            if self.validate():
-                self.process()
-        self.end()
 
     def recieve(self):
         if self.message:
@@ -345,3 +336,12 @@ class BaseActor(Actor):
             self.sleep()
         else:
             self.stop()
+
+    @property
+    def is_waiting_message(self):
+        """ Override """
+        return True
+
+    def __str__(self):
+        old = super(BaseActor, self).__str__()
+        return "{0}".format(old)

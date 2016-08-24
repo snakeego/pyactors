@@ -16,7 +16,7 @@ __all__ = ['RabbitMQInbox']
 class RabbitMQQueue(object):
     _channel = None
     _connection_parameters = dict()
-    _queue = None
+
 
     logger = getLogger()
 
