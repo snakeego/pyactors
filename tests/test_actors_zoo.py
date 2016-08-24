@@ -50,5 +50,3 @@ class ActorsZooTest(unittest.TestCase):
             except EmptyInboxException:
                 break
         self.assertEqual(len(result), 50)
-        
-                

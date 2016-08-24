@@ -1,4 +1,3 @@
-
 graph:
 	@ dot -T png docs/actors-hierarchy.gv -o docs/actors-hierarchy.png && eog docs/actors-hierarchy.png
 
@@ -19,3 +18,5 @@ test-with-coverage:
 	@ nosetests --with-coverage
 	@ echo 'Tests completed'
 
+clean:
+	@ find . -name "*.pyc" -delete

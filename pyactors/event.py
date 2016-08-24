@@ -1,47 +1,60 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+import eventlet
 from multiprocessing import Event
 from multiprocessing import Process
 
-from .base import Actor, BaseActor, AF_GENERATOR, AF_PROCESS
-from .inbox import DequeInbox, ProcessInbox
+from .base import Actor, BaseActor, AF_GREENLET, AF_PROCESS
+from .inbox import ProcessInbox
+from .inbox.event import EventletInbox
 
 
-class GeneratorActor(Actor):
-    ''' Generator Actor
-    '''
+class EventletActor(Actor):
+    ''' Eventlet Actor '''
+
     def __init__(self, name=None, logger=None):
-        ''' __init__
-        '''
-        super(GeneratorActor, self).__init__(name=name, logger=logger)
+        ''' __init__ '''
+
+        super(EventletActor, self).__init__(name=name, logger=logger)
 
         # inbox
-        self.inbox = DequeInbox()
+        self.inbox = EventletInbox()
 
         # Actor Family
-        self._family = AF_GENERATOR
+        self._family = AF_GREENLET
+
+    def sleep(self, timeout=None):
+        ''' actor sleep for timeout '''
+
+        timeout = 0.01 if timeout is None else timeout
+        eventlet.sleep(timeout)
 
     def start(self):
-        ''' start actor
-        '''
-        super(GeneratorActor, self).start()
+        ''' start actor '''
+
+        super(EventletActor, self).start()
         if len(self.children) > 0:
             self.supervise_loop = self.supervise()
         else:
-            self.processing_loop = self.loop()
+            self.processing_loop = eventlet.spawn(self.loop)
+
+    def stop(self):
+        ''' stop actor '''
+
+        super(EventletActor, self).stop()
 
     def run_once(self):
-        ''' one actor iteraction (processing + supervising)
-        '''
+        ''' one actor iteraction (processing + supervising) '''
+
+        self.sleep()
+
         # processing
-        if self.processing_loop:
-            try:
-                self.processing_loop.next()
-            except StopIteration:
+        if self.processing_loop is not None:
+            if self.processing_loop.wait():
                 self.processing_loop = None
 
         # children supervising
-        if self.supervise_loop:
+        if self.supervise_loop is not None:
             try:
                 self.supervise_loop.next()
             except StopIteration:
@@ -54,28 +67,27 @@ class GeneratorActor(Actor):
             return False
 
     def run(self):
-        ''' run actor
-        '''
+        ''' run actor '''
+
         while self.processing:
             try:
                 if not self.run_once():
                     break
             except Exception, err:
-                self._logger(err)
+                self.logger.error(err)
                 break
 
 
-class ForkedGeneratorActor(GeneratorActor):
-    ''' Forked GeneratorActor
+class ForkedEventletActor(EventletActor):
+    ''' Forked GreenletActor
     '''
-    def __init__(self, name=None, logger=None):
+    def __init__(self, name=None, logger=None, conn=None):
         ''' __init__
         '''
-        super(ForkedGeneratorActor, self).__init__(name=name, logger=logger)
+        super(ForkedEventletActor, self).__init__(name=name, logger=logger)
 
         # Actor Family
         self._family = AF_PROCESS
-        self._subfamily = AF_GENERATOR
 
         self.inbox = ProcessInbox()
 
@@ -84,6 +96,7 @@ class ForkedGeneratorActor(GeneratorActor):
 
         self._process = Process(name=self._name, target=self.run)
         self._process.daemon = False
+        self._logger = None
 
     @property
     def processing(self):
@@ -126,13 +139,13 @@ class ForkedGeneratorActor(GeneratorActor):
     def start(self):
         ''' start actor
         '''
-        super(ForkedGeneratorActor, self).start()
+        super(ForkedEventletActor, self).start()
         self._process.start()
 
 
-class BaseGeneratorActor(GeneratorActor, BaseActor):
+class BaseEventletActor(EventletActor, BaseActor):
     pass
 
 
-class BaseForkedGeneratorActor(ForkedGeneratorActor, BaseActor):
+class BaseForkedEventletActor(ForkedEventletActor, BaseActor):
     pass

@@ -1,47 +1,58 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+import gevent
 from multiprocessing import Event
 from multiprocessing import Process
 
-from .base import Actor, BaseActor, AF_GENERATOR, AF_PROCESS
+from .base import Actor, BaseActor, AF_GREENLET, AF_PROCESS
 from .inbox import DequeInbox, ProcessInbox
 
 
-class GeneratorActor(Actor):
-    ''' Generator Actor
+class GreenletActor(Actor):
+    ''' Greenlet Actor
     '''
     def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        super(GeneratorActor, self).__init__(name=name, logger=logger)
+        super(GreenletActor, self).__init__(name=name, logger=logger)
 
         # inbox
         self.inbox = DequeInbox()
 
         # Actor Family
-        self._family = AF_GENERATOR
+        self._family = AF_GREENLET
+
+    def sleep(self, timeout=0):
+        ''' actor sleep for timeout
+        '''
+        gevent.sleep(timeout)
 
     def start(self):
         ''' start actor
         '''
-        super(GeneratorActor, self).start()
+        super(GreenletActor, self).start()
         if len(self.children) > 0:
             self.supervise_loop = self.supervise()
         else:
-            self.processing_loop = self.loop()
+            self.processing_loop = gevent.spawn(self.loop)
+
+    def stop(self):
+        ''' stop actor
+        '''
+        super(GreenletActor, self).stop()
 
     def run_once(self):
         ''' one actor iteraction (processing + supervising)
         '''
+        self.sleep()
+
         # processing
-        if self.processing_loop:
-            try:
-                self.processing_loop.next()
-            except StopIteration:
+        if self.processing_loop is not None:
+            if self.processing_loop.ready():
                 self.processing_loop = None
 
         # children supervising
-        if self.supervise_loop:
+        if self.supervise_loop is not None:
             try:
                 self.supervise_loop.next()
             except StopIteration:
@@ -61,21 +72,21 @@ class GeneratorActor(Actor):
                 if not self.run_once():
                     break
             except Exception, err:
-                self._logger(err)
+                self._logger.error(err)
                 break
 
 
-class ForkedGeneratorActor(GeneratorActor):
-    ''' Forked GeneratorActor
+class ForkedGreenletActor(GreenletActor):
+    ''' Forked GreenletActor
     '''
     def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        super(ForkedGeneratorActor, self).__init__(name=name, logger=logger)
+        super(ForkedGreenletActor, self).__init__(name=name, logger=logger)
 
         # Actor Family
         self._family = AF_PROCESS
-        self._subfamily = AF_GENERATOR
+        self._subfamily = AF_GREENLET
 
         self.inbox = ProcessInbox()
 
@@ -126,13 +137,13 @@ class ForkedGeneratorActor(GeneratorActor):
     def start(self):
         ''' start actor
         '''
-        super(ForkedGeneratorActor, self).start()
+        super(ForkedGreenletActor, self).start()
         self._process.start()
 
 
-class BaseGeneratorActor(GeneratorActor, BaseActor):
+class BaseGreenletActor(GreenletActor, BaseActor):
     pass
 
 
-class BaseForkedGeneratorActor(ForkedGeneratorActor, BaseActor):
+class BaseForkedGreenletActor(ForkedGreenletActor, BaseActor):
     pass
