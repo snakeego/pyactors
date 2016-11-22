@@ -9,6 +9,7 @@ from .generator import GeneratorActor
 class ThreadedGeneratorActor(GeneratorActor):
     ''' Threaded GeneratorActor
     '''
+
     def __init__(self, name=None, logger=None):
         ''' __init__
         '''

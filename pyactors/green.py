@@ -11,6 +11,7 @@ from .inbox import DequeInbox, ProcessInbox
 class GreenletActor(Actor):
     ''' Greenlet Actor
     '''
+
     def __init__(self, name=None, logger=None):
         ''' __init__
         '''
@@ -71,7 +72,7 @@ class GreenletActor(Actor):
             try:
                 if not self.run_once():
                     break
-            except Exception, err:
+            except Exception as err:
                 self._logger.error(err)
                 break
 
@@ -79,6 +80,7 @@ class GreenletActor(Actor):
 class ForkedGreenletActor(GreenletActor):
     ''' Forked GreenletActor
     '''
+
     def __init__(self, name=None, logger=None):
         ''' __init__
         '''

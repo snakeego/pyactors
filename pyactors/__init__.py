@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
-from .base import Actor, ActorSystem
-
-__author__ = '''
-    Andrey Usov <https://github.com/ownport/pyactors>,
-    Voropaev Igor <https://github.com/snakeego/pyactors>
-'''
-__version__ = '0.4.0.2'
 __license__ = """
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -29,4 +20,9 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 """
 
-__all__ = ['Actor', 'ActorSystem']
+__author__ = '''
+    Andrey Usov <https://github.com/ownport/pyactors>,
+    Voropaev Igor <https://github.com/snakeego/pyactors>
+'''
+
+__version__ = '0.5'

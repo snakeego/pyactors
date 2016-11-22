@@ -8,7 +8,7 @@ from setuptools import setup
 setup(
     name="pyactors",
     version=pyactors.__version__,
-    author=re.sub(r'\s+<.*', r'', pyactors.__author__),
+    author=re.sub(r'\s+<.*', r'', open('README.md').read()),
     author_email='ownport@gmail.com',
     url='https://github.com/ownport/pyactors',
     description='Simple implementation actors on python',

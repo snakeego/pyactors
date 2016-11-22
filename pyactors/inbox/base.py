@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-import Queue
+import queue
 import logging
 import collections
 import multiprocessing
@@ -13,6 +13,7 @@ __all__ = ['DequeInbox', 'QueueInbox', 'ProcessInbox']
 class DequeInbox(object):
     ''' Inbox from collections.deque
     '''
+
     def __init__(self, logger=None):
         ''' __init__
         '''
@@ -45,10 +46,11 @@ class DequeInbox(object):
 class QueueInbox(object):
     ''' Inbox from Queue.Queue
     '''
+
     def __init__(self, logger=None):
         ''' __init__
         '''
-        self.__inbox = Queue.Queue()
+        self.__inbox = queue.Queue()
 
         if logger is None:
             self._logger = logging.getLogger('%s.QueueInbox' % __name__)
@@ -61,7 +63,7 @@ class QueueInbox(object):
         try:
             result = self.__inbox.get_nowait()
             self.__inbox.task_done()
-        except Queue.Empty:
+        except queue.Empty:
             raise EmptyInboxException
         return result
 
@@ -79,6 +81,7 @@ class QueueInbox(object):
 class ProcessInbox(object):
     ''' Inbox from multiprocessing.Queue
     '''
+
     def __init__(self, logger=None):
         ''' __init__
         '''
@@ -94,7 +97,7 @@ class ProcessInbox(object):
         '''
         try:
             result = self.__inbox.get_nowait()
-        except Queue.Empty:
+        except queue.Empty:
             raise EmptyInboxException
         return result
 

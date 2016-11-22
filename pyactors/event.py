@@ -73,7 +73,7 @@ class EventletActor(Actor):
             try:
                 if not self.run_once():
                     break
-            except Exception, err:
+            except Exception as err:
                 self.logger.error(err)
                 break
 
@@ -81,6 +81,7 @@ class EventletActor(Actor):
 class ForkedEventletActor(EventletActor):
     ''' Forked GreenletActor
     '''
+
     def __init__(self, name=None, logger=None, conn=None):
         ''' __init__
         '''

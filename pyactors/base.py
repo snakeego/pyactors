@@ -89,7 +89,7 @@ class Actor(object):
     @property
     def children(self):
         ''' return list of actor's children '''
-        return self._children.values()
+        return list(self._children.values())
 
     def find(self, address=None, actor_class=None, actor_name=None):
         """ find children by criterias
@@ -118,7 +118,7 @@ class Actor(object):
 
         if address:
             # when address is only one
-            if isinstance(address, (str, unicode)):
+            if isinstance(address, str):
                 result.extend([actor for actor in known_actors if actor.address == address])
             # when address if multiple
             elif isinstance(address, (list, tuple)):
@@ -196,15 +196,12 @@ class Actor(object):
         while self.processing:
             stopped_children = 0
             for child in self.children:
-                # child.processing is just a flag which give you information
-                # that the actor should be stopped but it's not a fact
-                # that the actor was stopped.
                 if child.processing:
                     if child.family in (AF_GENERATOR, AF_GREENLET):
                         try:
                             child.run_once()
-                        except Exception, err:
-                            self._logger.error(err)
+                        except Exception as err:
+                            self.logger.error(err)
                 else:
                     stopped_children += 1
                 yield

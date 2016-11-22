@@ -10,15 +10,12 @@ from .inbox import DequeInbox, ProcessInbox
 class GeneratorActor(Actor):
     ''' Generator Actor
     '''
+
     def __init__(self, name=None, logger=None):
         ''' __init__
         '''
         super(GeneratorActor, self).__init__(name=name, logger=logger)
-
-        # inbox
         self.inbox = DequeInbox()
-
-        # Actor Family
         self._family = AF_GENERATOR
 
     def start(self):
@@ -60,14 +57,15 @@ class GeneratorActor(Actor):
             try:
                 if not self.run_once():
                     break
-            except Exception, err:
-                self._logger(err)
+            except Exception as err:
+                self.logger.error(err)
                 break
 
 
 class ForkedGeneratorActor(GeneratorActor):
     ''' Forked GeneratorActor
     '''
+
     def __init__(self, name=None, logger=None):
         ''' __init__
         '''
