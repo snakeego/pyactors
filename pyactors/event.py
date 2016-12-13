@@ -56,7 +56,7 @@ class EventletActor(Actor):
         # children supervising
         if self.supervise_loop is not None:
             try:
-                self.supervise_loop.next()
+                self.supervise_loop.__next__()
             except StopIteration:
                 self.supervise_loop = None
 
