@@ -89,18 +89,26 @@ class RedisInbox(object):
         self._channel = RedisQueue(**conn)
 
     def get(self):
-        out = self._channel.get(queue=self.get_queue)
+        return self.get_from(self.get_queue)
 
+    def get_from(self, queue):
+        out = self._channel.get(queue=queue)
         if out is None:
             raise EmptyInboxException
 
         return out
 
     def put(self, message):
-        return self._channel.put(message, queue=self._put_queue)
+        return self.put_in(self.put_queue)
+
+    def put_in(self, message, queue):
+        return self._channel.put(message, queue=queue)
 
     def __len__(self):
-        return self._channel.length(queue=self._get_queue)
+        return self.total(self._get_queue)
+
+    def total(self, queue):
+        return self._channel.length(queue=queue)
 
     @property
     def get_queue(self):
@@ -111,7 +119,7 @@ class RedisInbox(object):
 
     @get_queue.setter
     def get_queue(self, value):
-        if type(value) not in [str, unicode]:
+        if not isinstance(value, str):
             raise ValueError("You must queue must be string")
         self._get_queue = value
 
@@ -122,13 +130,13 @@ class RedisInbox(object):
     @property
     def put_queue(self):
         if self._put_queue is None:
-            raise AttributeError("You must set queue for getting messages")
+            raise AttributeError("You must set queue for putting messages")
 
         return self._put_queue
 
     @put_queue.setter
     def put_queue(self, value):
-        if type(value) not in [str, unicode]:
+        if not isinstance(value, str):
             raise ValueError("You must queue must be string")
         self._put_queue = value
 
