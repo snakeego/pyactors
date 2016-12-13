@@ -99,7 +99,7 @@ class RedisInbox(object):
         return out
 
     def put(self, message):
-        return self.put_in(self.put_queue)
+        return self.put_in(message, self.put_queue)
 
     def put_in(self, message, queue):
         return self._channel.put(message, queue=queue)
