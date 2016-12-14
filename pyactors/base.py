@@ -16,7 +16,7 @@ class Actor(object):
     ''' Base class for creation actors '''
 
     def __init__(self, name=None, logger=None):
-        self.logger = logger if logger else logging.getLogger('%s.Actor' % __name__)
+        self.logger = logger if logger else logging.getLogger(self.__class__.__name__)
 
         self._name = name if name else self.__class__.__name__
         self._family = None

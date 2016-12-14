@@ -12,7 +12,7 @@ class EventletInbox(object):
         self.__inbox = EventletQueue()
 
         if logger is None:
-            self._logger = getLogger('%s.EventletInbox' % __name__)
+            self._logger = getLogger(self.__class__.__name__)
         else:
             self._logger = logger
 
@@ -22,6 +22,7 @@ class EventletInbox(object):
             result = self.__inbox.get_nowait()
         except EventletEmpty:
             raise EmptyInboxException
+
         return result
 
     def put(self, message):
