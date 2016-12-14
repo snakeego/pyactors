@@ -51,7 +51,7 @@ class RedisQueue(object):
         timeout = kwargs.pop('timeout') if isinstance(kwargs.get('timeout'), int) else 1
 
         try:
-            return loads(self._cli.brpop(queue, timeout)[1])
+            return loads(str(self._cli.brpop(queue, timeout)[1], 'utf-8'))
         except TypeError:
             return None
         except ValueError:
