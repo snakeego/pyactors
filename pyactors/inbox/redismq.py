@@ -18,11 +18,10 @@ class RedisQueue(object):
     _connection_parameters = dict()
     _queue = None
 
-    logger = getLogger()
-
     def __init__(self, **kwargs):
         self._queue = kwargs.pop('queue', None)
         self._connection_parameters.update(kwargs)
+        self.logger = getLogger(self.__class__.__name__)
 
     def connect(self, **kwargs):
         if self._cli and not kwargs:
@@ -52,9 +51,7 @@ class RedisQueue(object):
 
         try:
             return loads(str(self._cli.brpop(queue, timeout)[1], 'utf-8'))
-        except TypeError:
-            return None
-        except ValueError:
+        except (TypeError, ValueError):
             return None
 
     def length(self, queue=None):
