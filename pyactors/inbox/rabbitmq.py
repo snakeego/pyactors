@@ -17,12 +17,10 @@ class RabbitMQQueue(object):
     _channel = None
     _connection_parameters = dict()
 
-
-    logger = getLogger()
-
     def __init__(self, **kwargs):
         self._queue = kwargs.pop('queue', None)
         self._connection_parameters.update(kwargs)
+        self.logger = getLogger(self.__class__.__name__)
 
     @property
     def queue(self):
@@ -123,7 +121,7 @@ class RabbitMQInbox(object):
 
     @get_queue.setter
     def get_queue(self, value):
-        if type(value) not in [str, unicode]:
+        if type(value) not in str:
             raise ValueError("You must queue must be string")
         self._get_queue = value
 
@@ -140,7 +138,7 @@ class RabbitMQInbox(object):
 
     @put_queue.setter
     def put_queue(self, value):
-        if type(value) not in [str, unicode]:
+        if type(value) not in str:
             raise ValueError("You must queue must be string")
         self._put_queue = value
 
