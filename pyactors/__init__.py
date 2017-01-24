@@ -25,4 +25,4 @@ __author__ = '''
     Voropaev Igor <https://github.com/snakeego/pyactors>
 '''
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'

@@ -228,7 +228,6 @@ class BaseActor(Actor):
         self.logger.debug("{0} --- Call loop.".format(self))
 
         while self.processing:
-            self.logger.debug("{0} --- Execute loop. Inbox: {1}".format(self, len(self.inbox)))
 
             try:
                 self.message = self.inbox.get()
@@ -236,6 +235,8 @@ class BaseActor(Actor):
                 if self.is_waiting_message:
                     self.sleep()
                     break
+            if len(self.inbox) > 0:
+                self.logger.debug("{0} --- Execute loop. Inbox: {1}".format(self, len(self.inbox)))
 
             self.recieve()
 
